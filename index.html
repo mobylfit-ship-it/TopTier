@@ -167,6 +167,24 @@
       backdrop-filter: blur(8px);
       box-shadow: 0 4px 20px rgba(0,0,0,0.35);
     }
+
+    /* ===== MOBILE: KILL INTRO OVERLAY ===== */
+@media (max-width: 1024px){
+
+  html.intro-enabled .hero-container{
+    display: none !important;
+  }
+
+  html.intro-enabled #scrollTriggerSection{
+    height: 0 !important;
+  }
+
+  html.intro-enabled #siteInner{
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+}
     /* ========= /INTRO LOGO ZOOM ========= */
   </style>
 </head>
@@ -616,6 +634,24 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
 
+// ===== DISABLE INTRO ON MOBILE =====
+const isMobile = window.matchMedia("(max-width: 1024px)").matches;
+
+if (isMobile){
+  document.documentElement.classList.remove("intro-enabled");
+
+  const hero = document.getElementById("heroContainer");
+  const spacer = document.getElementById("scrollTriggerSection");
+  const page = document.getElementById("siteInner");
+
+  if(hero) hero.style.display = "none";
+  if(spacer) spacer.style.height = "0px";
+  if(page){
+    page.style.opacity = "1";
+    page.style.transform = "none";
+  }
+}
+      
       // ====== PREVIEW-SAFE INTRO ENABLE ======
       // Only run the intro if GSAP + ScrollTrigger are actually available.
       const hasGSAP = typeof window.gsap !== "undefined";
@@ -901,5 +937,6 @@
   </script>
 </body>
 </html>
+
 
 
