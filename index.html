@@ -648,327 +648,192 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
+  const isMobile = window.matchMedia("(max-width: 1024px)").matches;
 
-// ===== DISABLE INTRO ON MOBILE =====
-const isMobile = window.matchMedia("(max-width: 1024px)").matches;
-if (isMobile) {
-  const heroEl = document.getElementById("heroContainer");
+  // ----------------------------
+  // 1) MOBILE DRAWER (ALWAYS)
+  // ----------------------------
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+  const mobileDrawer  = document.getElementById("mobileDrawer");
+
+  function closeDrawer() {
+    if (!mobileDrawer) return;
+    mobileDrawer.classList.add("hidden");
+    mobileMenuBtn?.setAttribute("aria-expanded", "false");
+    const icon = mobileMenuBtn?.querySelector("i");
+    if (icon) icon.className = "fa-solid fa-bars";
+  }
+
+  function toggleDrawer() {
+    if (!mobileDrawer) return;
+    const willOpen = mobileDrawer.classList.contains("hidden");
+    mobileDrawer.classList.toggle("hidden", !willOpen);
+    mobileMenuBtn?.setAttribute("aria-expanded", String(willOpen));
+    const icon = mobileMenuBtn?.querySelector("i");
+    if (icon) icon.className = willOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars";
+  }
+
+  mobileMenuBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleDrawer();
+  });
+
+  mobileDrawer?.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener("click", closeDrawer);
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeDrawer();
+  });
+
+  // ----------------------------
+  // 2) SHOP SELECTOR (ALWAYS)
+  // ----------------------------
+  const bookingPanel     = document.getElementById("shopBookingPanel");
+  const selectedShopName = document.getElementById("selectedShopName");
+  const shopBookBtn      = document.getElementById("shopBookBtn");
+
+  const navBookBtn       = document.getElementById("navBookBtn");
+  const navBookBtnMobile = document.getElementById("navBookBtnMobile");
+  const drawerBookBtn    = document.getElementById("drawerBookBtn");
+  const heroBookBtn      = document.getElementById("heroBookBtn");
+  const ctaBookBtn       = document.getElementById("ctaBookBtn");
+
+  function setBooking(shopName, bookingUrl) {
+    if (selectedShopName) selectedShopName.textContent = shopName;
+    if (shopBookBtn) shopBookBtn.href = bookingUrl;
+
+    bookingPanel?.classList.remove("hidden");
+
+    [navBookBtn, navBookBtnMobile, drawerBookBtn, heroBookBtn, ctaBookBtn].forEach(btn => {
+      if (!btn) return;
+      btn.href = bookingUrl;
+      btn.target = "_blank";
+      btn.rel = "noopener";
+    });
+
+    bookingPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+    closeDrawer();
+  }
+
+  // event delegation = reliable on mobile
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-shop]");
+    if (!btn) return;
+    const shopName = btn.getAttribute("data-shop-name") || "Top Tier";
+    const bookingUrl = btn.getAttribute("data-booking-url") || "#";
+    setBooking(shopName, bookingUrl);
+  });
+
+  // ----------------------------
+  // 3) INTRO: DISABLE ON MOBILE
+  // ----------------------------
+  const heroEl   = document.getElementById("heroContainer");
   const spacerEl = document.getElementById("scrollTriggerSection");
-  const pageEl = document.getElementById("siteInner");
+  const pageEl   = document.getElementById("siteInner");
 
-  document.documentElement.classList.remove("intro-enabled");
-
-  if (heroEl) heroEl.style.display = "none";
-  if (spacerEl) spacerEl.style.height = "0px";
-  if (pageEl) {
-    pageEl.style.opacity = "1";
-    pageEl.style.transform = "none";
-  }
-}    
-      // ====== PREVIEW-SAFE INTRO ENABLE ======
-      // Only run the intro if GSAP + ScrollTrigger are actually available.
-      const hasGSAP = typeof window.gsap !== "undefined";
-      const hasST = typeof window.ScrollTrigger !== "undefined";
-
-      const hero = document.getElementById("heroContainer");
-      const page = document.getElementById("siteInner");
-
-      if (!(hasGSAP && hasST)) {
-  if (hero) hero.style.display = "none";
-  if (page) { page.style.opacity = "1"; page.style.transform = "none"; }
-  // DO NOT return;
-} else {
-  gsap.registerPlugin(ScrollTrigger);
-
-  if (!isMobile) {
-    // intro timeline here
+  if (isMobile) {
+    document.documentElement.classList.remove("intro-enabled");
+    if (heroEl) heroEl.style.display = "none";
+    if (spacerEl) spacerEl.style.height = "0px";
+    if (pageEl) { pageEl.style.opacity = "1"; pageEl.style.transform = "none"; }
   }
 
-  // reveal animations can stay here if you want
-}
+  // ----------------------------
+  // 4) GSAP (OPTIONAL)
+  // ----------------------------
+  const hasGSAP = typeof window.gsap !== "undefined";
+  const hasST   = typeof window.ScrollTrigger !== "undefined";
+
+  if (!hasGSAP || !hasST) return;
 
   gsap.registerPlugin(ScrollTrigger);
 
+  // Desktop intro only
   if (!isMobile) {
-    /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
-    // (your intro timelines exactly as-is)
-    /* ========= /INTRO ========= */
-  }
+    document.documentElement.classList.add("intro-enabled");
 
-  // your reveal/stagger animations can still run here if you want them tied to GSAP
-}
+    const revealAt = 0.12;
+    let revealed = false;
 
-      // Enable intro mode (CSS hooks) — desktop only
-if (!isMobile) document.documentElement.classList.add("intro-enabled");;
+    gsap.set(heroEl, { autoAlpha: 1, display: "flex" });
+    gsap.set(pageEl, { autoAlpha: 0, y: 12 });
 
-      gsap.registerPlugin(ScrollTrigger);
-if (!isMobile) {
-  /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
-  // your entire intro timeline code goes here
-  /* ========= /INTRO ========= */
-}
+    const heroTl = gsap.timeline({ paused: true });
 
-      /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
+    heroTl.from(".hero-bg", { scale: 1.15, duration: 2.5, ease: "power2.out" }, 0)
+      .from(".hero-content p:first-child", { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" }, 0.3)
+      .from(".hero-content h1", { y: 40, opacity: 0, duration: 1, ease: "power3.out" }, 0.5)
+      .from(".hero-content p:not(:first-child)", { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" }, 0.8)
+      .from(".hero-content a", { y: 20, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power2.out" }, 1.0);
 
-      // tune this: 0.08 = faster reveal, 0.18 = later reveal
-      const revealAt = 0.12;
-      let revealed = false;
-
-      gsap.set(hero, { autoAlpha: 1, display: "flex" });
-      gsap.set(page, { autoAlpha: 0, y: 12 });
-
-      // Pause hero entrance animations until the page is revealed
-      const heroTl = gsap.timeline({ paused: true });
-
-      heroTl.from(".hero-bg", {
-        scale: 1.15,
-        duration: 2.5,
-        ease: "power2.out"
-      }, 0)
-      .from(".hero-content p:first-child", {
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.out"
-      }, 0.3)
-      .from(".hero-content h1", {
-        y: 40,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out"
-      }, 0.5)
-      .from(".hero-content p:not(:first-child)", {
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.out"
-      }, 0.8)
-      .from(".hero-content a", {
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power2.out"
-      }, 1.0);
-
-      // Logo zoom timeline (scrubbed)
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: "#scrollTriggerSection",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-          onUpdate: (self) => {
-            // reveal site early when logo is "big enough"
-            if (self.progress >= revealAt && !revealed) {
-              revealed = true;
-
-              gsap.to(page, { autoAlpha: 1, y: 0, duration: 0.25, overwrite: true });
-              gsap.to(hero, { backgroundColor: "rgba(0,0,0,0)", duration: 0.25, overwrite: true });
-
-              heroTl.play(0);
-            }
-
-            // if user scrolls back up above reveal point, hide site again
-            if (self.progress < revealAt && revealed) {
-              revealed = false;
-
-              gsap.to(page, { autoAlpha: 0, y: 12, duration: 0.2, overwrite: true });
-              gsap.to(hero, { backgroundColor: "#000", duration: 0.2, overwrite: true });
-
-              heroTl.pause(0);
-            }
-
-            // once intro is basically done, remove overlay entirely
-            if (self.progress > 0.98) {
-              gsap.set(hero, { autoAlpha: 0, display: "none" });
-            } else {
-              gsap.set(hero, { display: "flex" });
-              if (!revealed) gsap.set(hero, { autoAlpha: 1 });
-            }
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: "#scrollTriggerSection",
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
+        onUpdate: (self) => {
+          if (self.progress >= revealAt && !revealed) {
+            revealed = true;
+            gsap.to(pageEl, { autoAlpha: 1, y: 0, duration: 0.25, overwrite: true });
+            gsap.to(heroEl, { backgroundColor: "rgba(0,0,0,0)", duration: 0.25, overwrite: true });
+            heroTl.play(0);
+          }
+          if (self.progress < revealAt && revealed) {
+            revealed = false;
+            gsap.to(pageEl, { autoAlpha: 0, y: 12, duration: 0.2, overwrite: true });
+            gsap.to(heroEl, { backgroundColor: "#000", duration: 0.2, overwrite: true });
+            heroTl.pause(0);
+          }
+          if (self.progress > 0.98) {
+            gsap.set(heroEl, { autoAlpha: 0, display: "none" });
+          } else {
+            gsap.set(heroEl, { display: "flex" });
+            if (!revealed) gsap.set(heroEl, { autoAlpha: 1 });
           }
         }
-      })
-      // first punch-in (fast feeling)
-      .to("#zoomLogo", {
-        scale: 70,
-        opacity: 0.25,
-        filter: "blur(6px)",
-        ease: "none"
-      }, 0)
-      // finish / disappear
-      .to("#zoomLogo", {
-        scale: 110,
-        opacity: 0,
-        filter: "blur(20px)",
-        ease: "none"
-      }, 0.45);
-      /* ========= /INTRO ========= */
-
-
-      // Navbar background change on scroll (desktop + mobile)
-      const navbar = document.getElementById('navbar');
-      window.addEventListener('scroll', () => {
-        if (!navbar) return;
-        if (window.scrollY > 50) {
-          navbar.classList.add('bg-darker/90', 'backdrop-blur-md');
-          navbar.classList.remove('nav-glass');
-        } else {
-          navbar.classList.remove('bg-darker/90', 'backdrop-blur-md');
-          navbar.classList.add('nav-glass');
-        }
-      }, { passive: true });
-
-      // Mobile drawer toggle
-      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-      const mobileDrawer = document.getElementById('mobileDrawer');
-
-      function closeDrawer() {
-        if (!mobileDrawer) return;
-        mobileDrawer.classList.add('hidden');
-        mobileMenuBtn?.setAttribute('aria-expanded', 'false');
-        const icon = mobileMenuBtn?.querySelector('i');
-        if (icon) icon.className = 'fa-solid fa-bars';
       }
+    })
+    .to("#zoomLogo", { scale: 70, opacity: 0.25, filter: "blur(6px)", ease: "none" }, 0)
+    .to("#zoomLogo", { scale: 110, opacity: 0, filter: "blur(20px)", ease: "none" }, 0.45);
+  }
 
-      function toggleDrawer() {
-        if (!mobileDrawer) return;
-        const isHidden = mobileDrawer.classList.contains('hidden');
-        mobileDrawer.classList.toggle('hidden', !isHidden);
-        mobileMenuBtn?.setAttribute('aria-expanded', String(isHidden));
-        const icon = mobileMenuBtn?.querySelector('i');
-        if (icon) icon.className = isHidden ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-      }
-
-      mobileMenuBtn?.addEventListener('click', toggleDrawer);
-
-      // Close drawer when clicking a link
-      mobileDrawer?.querySelectorAll('a[href^="#"]').forEach(a => {
-        a.addEventListener('click', () => closeDrawer());
-      });
-
-      // Close on Escape
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeDrawer();
-      });
-
-      // Generic Reveal Up
-      gsap.utils.toArray('.reveal-up').forEach(elem => {
-        gsap.from(elem, {
-          scrollTrigger: {
-            trigger: elem,
-            start: "top 85%",
-            toggleActions: "play none none reverse"
-          },
-          y: 50,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power3.out"
-        });
-      });
-
-      // Reveal Left
-      gsap.utils.toArray('.reveal-left').forEach(elem => {
-        gsap.from(elem, {
-          scrollTrigger: {
-            trigger: elem,
-            start: "top 80%",
-          },
-          x: -50,
-          opacity: 0,
-          duration: 1,
-          ease: "power3.out"
-        });
-      });
-
-      // Reveal Right
-      gsap.utils.toArray('.reveal-right').forEach(elem => {
-        gsap.from(elem, {
-          scrollTrigger: {
-            trigger: elem,
-            start: "top 80%",
-          },
-          x: 50,
-          opacity: 0,
-          duration: 1,
-          ease: "power3.out"
-        });
-      });
-
-      // Stagger Cards (Services)
-      gsap.utils.toArray('.stagger-container').forEach(container => {
-        const items = container.querySelectorAll('.stagger-item');
-        gsap.from(items, {
-          scrollTrigger: {
-            trigger: container,
-            start: "top 80%",
-          },
-          y: 50,
-          opacity: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power2.out"
-        });
-      });
-
-      // Stagger Cards (Kicks)
-      gsap.utils.toArray('.stagger-container-kicks').forEach(container => {
-        const items = container.querySelectorAll('.stagger-kick');
-        gsap.from(items, {
-          scrollTrigger: {
-            trigger: container,
-            start: "top 80%",
-          },
-          y: 50,
-          opacity: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power2.out"
-        });
-      });
-
-      // Shop selector -> unlock booking link (desktop + mobile + drawer)
-      const shopButtons = document.querySelectorAll('[data-shop]');
-      const bookingPanel = document.getElementById('shopBookingPanel');
-      const selectedShopName = document.getElementById('selectedShopName');
-      const shopBookBtn = document.getElementById('shopBookBtn');
-
-      const navBookBtn = document.getElementById('navBookBtn');
-      const navBookBtnMobile = document.getElementById('navBookBtnMobile');
-      const drawerBookBtn = document.getElementById('drawerBookBtn');
-      const heroBookBtn = document.getElementById('heroBookBtn');
-      const ctaBookBtn = document.getElementById('ctaBookBtn');
-
-      function setBooking(shopName, bookingUrl) {
-        if (selectedShopName) selectedShopName.textContent = shopName;
-        if (shopBookBtn) shopBookBtn.href = bookingUrl;
-
-        bookingPanel?.classList.remove('hidden');
-
-        [navBookBtn, navBookBtnMobile, drawerBookBtn, heroBookBtn, ctaBookBtn].forEach(btn => {
-          if (!btn) return;
-          btn.href = bookingUrl;
-          btn.target = "_blank";
-          btn.rel = "noopener";
-        });
-
-        bookingPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
-        closeDrawer();
-      }
-
-      shopButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const shopName = btn.getAttribute('data-shop-name') || 'Top Tier';
-          const bookingUrl = btn.getAttribute('data-booking-url') || '#';
-          setBooking(shopName, bookingUrl);
-        });
-      });
-
+  // Your reveal animations (optional) can stay:
+  gsap.utils.toArray(".reveal-up").forEach(elem => {
+    gsap.from(elem, {
+      scrollTrigger: { trigger: elem, start: "top 85%", toggleActions: "play none none reverse" },
+      y: 50, opacity: 0, duration: 0.8, ease: "power3.out"
     });
-  </script>
+  });
+
+  gsap.utils.toArray(".reveal-left").forEach(elem => {
+    gsap.from(elem, {
+      scrollTrigger: { trigger: elem, start: "top 80%" },
+      x: -50, opacity: 0, duration: 1, ease: "power3.out"
+    });
+  });
+
+  gsap.utils.toArray(".reveal-right").forEach(elem => {
+    gsap.from(elem, {
+      scrollTrigger: { trigger: elem, start: "top 80%" },
+      x: 50, opacity: 0, duration: 1, ease: "power3.out"
+    });
+  });
+
+  gsap.utils.toArray(".stagger-container").forEach(container => {
+    const items = container.querySelectorAll(".stagger-item");
+    gsap.from(items, {
+      scrollTrigger: { trigger: container, start: "top 80%" },
+      y: 50, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out"
+    });
+  });
+});
+</script>
 </body>
 </html>
+
 
 
 
