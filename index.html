@@ -189,6 +189,12 @@
       pointer-events: auto;
       touch-action: manipulation;
     }
+    /* Make anchor jumps + scrollIntoView respect the fixed navbar */
+html { scroll-padding-top: 92px; } /* adjust 80–110px if needed */
+
+/* Extra safety for the panel */
+#shopBookingPanel { scroll-margin-top: 92px; }
+    
     /* ========= /INTRO LOGO ZOOM ========= */
   </style>
 </head>
@@ -827,6 +833,7 @@ introTl
 </script>
 </body>
 </html>
+
 
 
 
