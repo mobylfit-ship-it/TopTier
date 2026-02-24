@@ -636,22 +636,20 @@
 
 // ===== DISABLE INTRO ON MOBILE =====
 const isMobile = window.matchMedia("(max-width: 1024px)").matches;
+if (isMobile) {
+  const heroEl = document.getElementById("heroContainer");
+  const spacerEl = document.getElementById("scrollTriggerSection");
+  const pageEl = document.getElementById("siteInner");
 
-if (isMobile){
   document.documentElement.classList.remove("intro-enabled");
 
-  const hero = document.getElementById("heroContainer");
-  const spacer = document.getElementById("scrollTriggerSection");
-  const page = document.getElementById("siteInner");
-
-  if(hero) hero.style.display = "none";
-  if(spacer) spacer.style.height = "0px";
-  if(page){
-    page.style.opacity = "1";
-    page.style.transform = "none";
+  if (heroEl) heroEl.style.display = "none";
+  if (spacerEl) spacerEl.style.height = "0px";
+  if (pageEl) {
+    pageEl.style.opacity = "1";
+    pageEl.style.transform = "none";
   }
-}
-      
+}    
       // ====== PREVIEW-SAFE INTRO ENABLE ======
       // Only run the intro if GSAP + ScrollTrigger are actually available.
       const hasGSAP = typeof window.gsap !== "undefined";
@@ -672,10 +670,11 @@ if (isMobile){
         return; // stop here (rest depends on GSAP)
       }
 
-      // Enable intro mode (CSS hooks)
-      document.documentElement.classList.add("intro-enabled");
+      // Enable intro mode (CSS hooks) — desktop only
+if (!isMobile) document.documentElement.classList.add("intro-enabled");;
 
       gsap.registerPlugin(ScrollTrigger);
+      if (isMobile) return;
 
       /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
 
@@ -937,6 +936,7 @@ if (isMobile){
   </script>
 </body>
 </html>
+
 
 
 
