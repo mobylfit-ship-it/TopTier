@@ -193,6 +193,16 @@
     visibility: hidden !important;
   }
 }
+
+    #mobileDrawer.hidden{
+  display: none !important;
+
+      [data-shop]{
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+}
     /* ========= /INTRO LOGO ZOOM ========= */
   </style>
 </head>
@@ -944,6 +954,7 @@ if (!isMobile) document.documentElement.classList.add("intro-enabled");;
   </script>
 </body>
 </html>
+
 
 
 
