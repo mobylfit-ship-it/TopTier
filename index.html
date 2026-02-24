@@ -678,10 +678,16 @@ if (isMobile) {
       if (!(hasGSAP && hasST)) {
   if (hero) hero.style.display = "none";
   if (page) { page.style.opacity = "1"; page.style.transform = "none"; }
-  // DO NOT return; booking + drawer must still initialize
+  // DO NOT return;
 } else {
-  // Enable intro mode (CSS hooks) — desktop only
-  if (!isMobile) document.documentElement.classList.add("intro-enabled");
+  gsap.registerPlugin(ScrollTrigger);
+
+  if (!isMobile) {
+    // intro timeline here
+  }
+
+  // reveal animations can stay here if you want
+}
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -698,7 +704,11 @@ if (isMobile) {
 if (!isMobile) document.documentElement.classList.add("intro-enabled");;
 
       gsap.registerPlugin(ScrollTrigger);
-if (isMobile) return;
+if (!isMobile) {
+  /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
+  // your entire intro timeline code goes here
+  /* ========= /INTRO ========= */
+}
 
       /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
 
@@ -960,6 +970,7 @@ if (isMobile) return;
   </script>
 </body>
 </html>
+
 
 
 
