@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Tier | Fades & Kicks</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#D4AF37',
+            dark: '#0a0a0a',
+            darker: '#050505',
+            panel: '#121212'
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'sans-serif'],
+            display: ['Oswald', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Styles */
+    body {
+      background-color: #050505;
+      color: #f3f4f6;
+      overflow-x: hidden;
+    }
+
+    .gold-gradient-text {
+      background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .nav-glass {
+      background: rgba(5, 5, 5, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Hide scrollbar for clean aesthetic */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050505; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+
+    /* Subtle image overlay effect */
+    .img-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(5,5,5,0.75) 0%,
+        rgba(5,5,5,0.35) 40%,
+        rgba(5,5,5,0.05) 80%
+      );
+      pointer-events: none;
+    }
+
+    /* ========= INTRO LOGO ZOOM (PREVIEW-SAFE) ========= */
+
+    /* IMPORTANT:
+       - Default: site is VISIBLE, overlay is HIDDEN (so editors/previews don't "lose" nav/content)
+       - Only if GSAP loads do we enable the intro overlay + hide site initially.
+    */
+
+    /* Overlay hidden by default */
+    .hero-container {
+      height: 100vh;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      background: #000;
+      pointer-events: none;
+      display: none; /* <-- default OFF */
+    }
+
+    /* When intro is enabled (JS adds .intro-enabled on <html>) */
+    html.intro-enabled .hero-container { display: flex; }
+
+    .logo-wrapper {
+      width: 90vw;
+      max-width: 1000px;
+      transform-origin: 32.5% 43.5%;
+      will-change: transform, opacity, filter;
+    }
+
+    #logoImage {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Spacer OFF by default (so page doesn't get weird if intro is disabled) */
+    #scrollTriggerSection {
+      height: 0;            /* <-- default OFF */
+      position: relative;
+      z-index: 1;
+    }
+    html.intro-enabled #scrollTriggerSection {
+      height: 140vh;        /* <-- intro ON */
+    }
+
+    /* Page wrapper always valid */
+    #pageContent {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Site is VISIBLE by default */
+    #siteInner {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    /* Only hide it when intro is enabled */
+    html.intro-enabled #siteInner {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .gold-underline{
+      position: relative;
+      display: inline-block;
+      color: #fff;
+    }
+    .gold-underline::after{
+      content:"";
+      position:absolute;
+      left: 0;
+      right: 0;
+      bottom: -0.06em;
+      height: 0.12em;
+      background: linear-gradient(to right, rgba(212,175,55,0.1), rgba(212,175,55,0.95), rgba(212,175,55,0.1));
+      border-radius: 999px;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
+    }
+
+    .hero-eyebrow{
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    }
+    /* ========= /INTRO LOGO ZOOM ========= */
+  </style>
+</head>
+
+<body class="antialiased selection:bg-gold selection:text-darker">
+
+  <!-- ========= INTRO OVERLAY ========= -->
+  <div class="hero-container" id="heroContainer" aria-hidden="true">
+    <div class="logo-wrapper" id="zoomLogo">
+      <img
+        id="logoImage"
+        src="imagesintro-logo.png"
+        alt="Top Tier Logo"
+      >
+    </div>
+  </div>
+
+  <!-- This spacer controls how fast you get to content (only active when intro-enabled) -->
+  <div id="scrollTriggerSection"></div>
+  <!-- ========= /INTRO OVERLAY ========= -->
+
+
+  <!-- ========= YOUR WHOLE SITE (WRAPPED) ========= -->
+  <main id="pageContent">
+    <div id="siteInner">
+
+      <!-- Navigation (Sticky Desktop + Sticky Mobile w/ Book + Drawer) -->
+      <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 py-4 px-6 md:px-12 nav-glass">
+        <div class="max-w-7xl mx-auto flex justify-between items-center gap-3">
+
+          <!-- Logo -->
+          <a href="#" class="flex items-center shrink-0">
+            <img
+              src="imageslogo.png"
+              alt="Top Tier Logo"
+              class="h-10 md:h-12 w-auto object-contain"
+            >
+          </a>
+
+          <!-- Desktop links -->
+          <div class="hidden md:flex space-x-8 items-center font-sans text-sm font-medium tracking-wide text-gray-300">
+            <a href="#about" class="hover:text-gold transition-colors duration-300">OUR STORY</a>
+            <a href="#services" class="hover:text-gold transition-colors duration-300">SERVICES</a>
+            <a href="#kicks" class="hover:text-gold transition-colors duration-300">KICKS</a>
+            <a href="#contact" class="hover:text-gold transition-colors duration-300">CONTACT</a>
+            <a id="navBookBtn" href="#shops" class="px-6 py-2 border border-gold text-gold hover:bg-gold hover:text-darker transition-all duration-300 uppercase tracking-widest">
+              Book Now
+            </a>
+          </div>
+
+          <!-- Mobile actions: Book + Hamburger -->
+          <div class="flex md:hidden items-center gap-3">
+            <a id="navBookBtnMobile" href="#shops"
+               class="px-4 py-2 border border-gold text-gold hover:bg-gold hover:text-darker transition-all duration-300 uppercase tracking-widest text-xs">
+              Book
+            </a>
+
+            <button id="mobileMenuBtn" class="text-white text-2xl focus:outline-none" type="button" aria-label="Open menu" aria-expanded="false">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Drawer -->
+        <div id="mobileDrawer" class="md:hidden hidden border-t border-white/10 bg-[#050505]/95 backdrop-blur-xl">
+          <div class="px-6 py-5 flex flex-col gap-4 font-sans text-sm font-medium tracking-wide text-gray-200">
+            <a href="#about" class="hover:text-gold transition-colors">OUR STORY</a>
+            <a href="#services" class="hover:text-gold transition-colors">SERVICES</a>
+            <a href="#kicks" class="hover:text-gold transition-colors">KICKS</a>
+            <a href="#contact" class="hover:text-gold transition-colors">CONTACT</a>
+
+            <a id="drawerBookBtn" href="#shops"
+               class="mt-2 inline-flex justify-center bg-gold text-darker px-6 py-3 font-bold uppercase tracking-widest text-xs hover:bg-white transition-colors">
+              Book Now
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Hero Section -->
+      <header class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+          <img src="TopTier.jpg" alt="Top Tier Fades and Kicks Team"
+               class="w-full h-full object-cover object-center scale-105 transform hero-bg"
+               onerror="this.src='https://www.vmcdn.ca/f/files/oakville/import/67d90d96_Top%20Tier%20barbershop%20Kerr%20village%202023.jpg'">
+          <div class="absolute inset-0 bg-gradient-to-t from-darker/90 via-darker/50 to-transparent"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full flex flex-col items-start mt-20">
+          <div class="hero-content max-w-2xl">
+            <p class="hero-eyebrow text-gold font-sans uppercase tracking-[0.25em] text-xs md:text-sm mb-4 font-semibold inline-flex items-center gap-2">
+              4.9 ★★★★★ Rated Across Top Tier Locations
+            </p>
+            <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-bold uppercase leading-[0.9] tracking-tight mb-6 text-white shadow-sm">
+              Fresh <span class="gold-underline">Fades.</span><br>
+              Exclusive <span class="gold-underline">Kicks.</span>
+            </h1>
+            <p class="font-sans text-gray-300 text-lg md:text-xl mb-10 max-w-lg font-light leading-relaxed">
+              More than a barbershop. We are a lifestyle destination at 2354 blending premium grooming with elite sneaker culture.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a id="heroBookBtn" href="#shops" class="bg-gold text-darker px-8 py-4 font-sans font-bold uppercase tracking-widest hover:bg-white transition-colors duration-300 text-center text-sm">
+                Book Appointment
+              </a>
+              <a href="#services" class="border border-white/30 text-white px-8 py-4 font-sans font-bold uppercase tracking-widest hover:border-white hover:bg-white/10 transition-all duration-300 text-center text-sm">
+                View Services
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+ <!-- About / Vibe Section -->
+      <section id="about" class="py-24 bg-darker relative border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="reveal-left">
+              <h2 class="font-display text-4xl md:text-5xl font-bold uppercase mb-6">The <span class="text-gold">Top Tier</span> Standard</h2>
+              <p class="text-gray-400 font-sans text-lg mb-6 leading-relaxed font-light">
+                Located at the heart of the community, Top Tier isn't just about cutting hair—it's about crafting confidence. We combined the precision of a high-end barbershop with the heat of an exclusive sneaker boutique.
+              </p>
+              <p class="text-gray-400 font-sans text-lg mb-8 leading-relaxed font-light">
+                Whether you need a flawless fade, a sharp line-up, or you're hunting for that rare pair of grails, our master barbers and sneaker curators have you covered. Step in, level up, and walk out top tier.
+              </p>
+              <div class="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
+                <div>
+                  <h3 class="font-display text-3xl font-bold text-white mb-1">10+</h3>
+                  <p class="text-gold font-sans text-xs uppercase tracking-widest">Master Barbers</p>
+                </div>
+                <div>
+                  <h3 class="font-display text-3xl font-bold text-white mb-1">100%</h3>
+                  <p class="text-gold font-sans text-xs uppercase tracking-widest">Authentic Kicks</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative reveal-right h-[600px] w-full rounded-sm overflow-hidden img-overlay">
+              <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" alt="Barbershop Interior" class="w-full h-full object-cover" />
+              <div class="absolute bottom-6 left-6 right-6 border border-white/20 bg-darker/60 backdrop-blur-md p-6">
+                <p class="font-display text-2xl text-white uppercase tracking-wider text-center">Where Grooming Meets Streetwear</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+</section>
+
+      <!-- Services Section -->
+      <section id="services" class="py-24 bg-dark relative">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+          <div class="text-center mb-16 reveal-up">
+            <p class="text-gold font-sans uppercase tracking-[0.3em] text-sm mb-2">Precision & Details</p>
+            <h2 class="font-display text-4xl md:text-5xl font-bold uppercase">The Grooming <span class="text-white/50">Menu</span></h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-container">
+            <div class="stagger-item bg-panel p-8 border border-white/5 hover:border-gold/30 transition-colors duration-500 group relative overflow-hidden cursor-pointer">
+              <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity duration-500">
+                <i class="fa-solid fa-scissors text-6xl text-gold"></i>
+              </div>
+              <h3 class="font-display text-2xl text-white uppercase mb-2 group-hover:text-gold transition-colors duration-300">The Top Tier Fade</h3>
+              <p class="text-xl font-sans text-white mb-4">$45</p>
+              <p class="text-gray-400 font-sans text-sm font-light leading-relaxed">Precision haircut tailored to your head shape, finished with a straight razor neck shave and premium styling product.</p>
+            </div>
+
+            <div class="stagger-item bg-panel p-8 border border-white/5 hover:border-gold/30 transition-colors duration-500 group relative overflow-hidden cursor-pointer">
+              <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity duration-500">
+                <i class="fa-solid fa-razor text-6xl text-gold"></i>
+              </div>
+              <h3 class="font-display text-2xl text-white uppercase mb-2 group-hover:text-gold transition-colors duration-300">Fade & Beard Sculpt</h3>
+              <p class="text-xl font-sans text-white mb-4">$60</p>
+              <p class="text-gray-400 font-sans text-sm font-light leading-relaxed">Our signature fade combined with a detailed beard trim, line up, and hot towel treatment for the ultimate refresh.</p>
+            </div>
+
+            <div class="stagger-item bg-panel p-8 border border-white/5 hover:border-gold/30 transition-colors duration-500 group relative overflow-hidden cursor-pointer">
+              <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity duration-500">
+                <i class="fa-solid fa-child text-6xl text-gold"></i>
+              </div>
+              <h3 class="font-display text-2xl text-white uppercase mb-2 group-hover:text-gold transition-colors duration-300">Kids Cut (Under 12)</h3>
+              <p class="text-xl font-sans text-white mb-4">$30</p>
+              <p class="text-gray-400 font-sans text-sm font-light leading-relaxed">Keeping the next generation looking sharp. Patient, precise, and styled to perfection.</p>
+            </div>
+
+            <div class="stagger-item bg-panel p-8 border border-white/5 hover:border-gold/30 transition-colors duration-500 group relative overflow-hidden cursor-pointer">
+              <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity duration-500">
+                <i class="fa-solid fa-user-tie text-6xl text-gold"></i>
+              </div>
+              <h3 class="font-display text-2xl text-white uppercase mb-2 group-hover:text-gold transition-colors duration-300">Beard Trim</h3>
+              <p class="text-xl font-sans text-white mb-4">$25</p>
+              <p class="text-gray-400 font-sans text-sm font-light leading-relaxed">Detailed beard shaping and edge work designed to maintain a sharp, well-groomed look between full appointments.</p>
+            </div>
+
+            <div class="stagger-item bg-panel p-8 border border-white/5 hover:border-gold/30 transition-colors duration-500 group relative overflow-hidden cursor-pointer">
+              <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity duration-500">
+                <i class="fa-solid fa-user-check text-6xl text-gold"></i>
+              </div>
+              <h3 class="font-display text-2xl text-white uppercase mb-2 group-hover:text-gold transition-colors duration-300">Seniors Cut (65+)</h3>
+              <p class="text-xl font-sans text-white mb-4">+$15</p>
+              <p class="text-gray-400 font-sans text-sm font-light leading-relaxed">A classic, comfortable haircut delivered with care and attention to detail — helping you look and feel your best every day.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kicks Section -->
+      <section id="kicks" class="py-24 bg-darker relative border-t border-white/5 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+
+  <div class="reveal-up text-center max-w-3xl mx-auto">
+    <p class="text-gold font-sans uppercase tracking-[0.3em] text-sm mb-3">
+      In-Store Only
+    </p>
+
+    <h2 class="font-display text-4xl md:text-5xl font-bold uppercase mb-6">
+      Buy • Sell • Trade
+    </h2>
+
+    <p class="text-gray-400 font-sans text-base md:text-lg font-light leading-relaxed">
+      Top Tier offers limited in-store buy, sell, and trade services for select footwear.
+      Availability varies by location.
+    </p>
+
+    <p class="text-gray-500 font-sans text-sm font-light mt-4">
+      Check in-store or call your preferred location for more information.
+    </p>
+  </div>
+
+</div>
+      </section>
+
+      <!-- Shops / Selector Section -->
+      <section id="shops" class="py-24 bg-dark relative border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+          <div class="text-center mb-14 reveal-up">
+            <p class="text-gold font-sans uppercase tracking-[0.3em] text-sm mb-2">Choose Your Location</p>
+            <h2 class="font-display text-4xl md:text-5xl font-bold uppercase">
+              Select a <span class="text-white/50">Shop</span>
+            </h2>
+            <p class="text-gray-400 font-sans text-base md:text-lg font-light mt-4 max-w-2xl mx-auto">
+              Tap a location to view the shop vibe and unlock booking for that specific chair.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-container">
+            <button type="button"
+              class="stagger-item text-left bg-panel border border-white/5 hover:border-gold/30 transition-colors duration-500 group overflow-hidden"
+              data-shop data-shop-name="Top Tier — KERR" data-booking-url="https://toptiercompany.resurva.com/availability">
+              <div class="relative h-56 overflow-hidden">
+                <img src="https://img1.wsimg.com/isteam/ip/48142e3e-2362-4745-8e38-46eaedb94a5f/Toptier%20Josh-2.jpg/:/cr=t:7.14%25,l:9.99%25,w:75.16%25,h:84.75%25/rs=w:360,h:270.6766917293233,cg:true,m"
+                  alt="Barbershop location"
+                  class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-darker via-darker/30 to-transparent"></div>
+                <div class="absolute bottom-4 left-4 right-4">
+                  <p class="font-display text-2xl uppercase text-white">KERR</p>
+                  <p class="text-gold font-sans text-xs uppercase tracking-widest mt-1">Premium Chairs • Walk-ins</p>
+                </div>
+              </div>
+              <div class="p-6">
+                <p class="text-gray-400 font-sans text-sm font-light leading-relaxed">
+                  One Top Tier standard across all locations. Select Kerr for the fastest walk-in flow and the main studio vibe.
+                </p>
+                <div class="mt-5 flex items-center justify-between">
+                  <span class="text-gray-300 font-sans text-sm">143 Kerr Street, Oakville ON</span>
+                  <span class="text-gold font-sans text-xs uppercase tracking-widest">Select</span>
+                </div>
+              </div>
+            </button>
+
+            <button type="button"
+              class="stagger-item text-left bg-panel border border-white/5 hover:border-gold/30 transition-colors duration-500 group overflow-hidden"
+              data-shop data-shop-name="Top Tier — PRESERVE" data-booking-url="https://toptiercompanypreserve.resurva.com/availability">
+              <div class="relative h-56 overflow-hidden">
+                <img src="https://img1.wsimg.com/isteam/ip/48142e3e-2362-4745-8e38-46eaedb94a5f/DSC05100.jpg/:/cr=t:2.83%25,l:8.19%25,w:83.63%25,h:94.34%25/rs=w:360,h:270.6766917293233,cg:true,m"
+                  alt="Barbershop location"
+                  class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-darker via-darker/30 to-transparent"></div>
+                <div class="absolute bottom-4 left-4 right-4">
+                  <p class="font-display text-2xl uppercase text-white">PRESERVE</p>
+                  <p class="text-gold font-sans text-xs uppercase tracking-widest mt-1">Beard Focus • Hot Towels</p>
+                </div>
+              </div>
+              <div class="p-6">
+                <p class="text-gray-400 font-sans text-sm font-light leading-relaxed">
+                  All Top Tier locations offer the same services. Select Preserve to book at this location.
+                </p>
+                <div class="mt-5 flex items-center justify-between">
+                  <span class="text-gray-300 font-sans text-sm">3046 Preserve Drive, Oakville ON</span>
+                  <span class="text-gold font-sans text-xs uppercase tracking-widest">Select</span>
+                </div>
+              </div>
+            </button>
+
+            <button type="button"
+              class="stagger-item text-left bg-panel border border-white/5 hover:border-gold/30 transition-colors duration-500 group overflow-hidden"
+              data-shop data-shop-name="Top Tier — BRONTE" data-booking-url="https://toptiercompanybronte.resurva.com/book">
+              <div class="relative h-56 overflow-hidden">
+                <img src="https://img1.wsimg.com/isteam/ip/48142e3e-2362-4745-8e38-46eaedb94a5f/IMG_0593.jpg/:/cr=t:21.8%25,l:0%25,w:100%25,h:56.39%25/rs=w:360,h:270.6766917293233,cg:true"
+                  alt="Barbershop location"
+                  class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-darker via-darker/30 to-transparent"></div>
+                <div class="absolute bottom-4 left-4 right-4">
+                  <p class="font-display text-2xl uppercase text-white">BRONTE</p>
+                  <p class="text-gold font-sans text-xs uppercase tracking-widest mt-1">Family Friendly • Kids Cuts</p>
+                </div>
+              </div>
+              <div class="p-6">
+                <p class="text-gray-400 font-sans text-sm font-light leading-relaxed">
+                  Same services across the brand. Select Bronte for easy access, simple parking, and family-friendly energy.
+                </p>
+                <div class="mt-5 flex items-center justify-between">
+                  <span class="text-gray-300 font-sans text-sm">2354 Lakeshore Road West, Oakville ON</span>
+                  <span class="text-gold font-sans text-xs uppercase tracking-widest">Select</span>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <div id="shopBookingPanel" class="mt-12 hidden">
+            <div class="bg-panel border border-white/10 p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div>
+                <p class="text-gold font-sans uppercase tracking-[0.3em] text-xs mb-2">Selected Shop</p>
+                <h3 id="selectedShopName" class="font-display text-2xl md:text-3xl uppercase text-white">—</h3>
+                <p class="text-gray-400 font-sans text-sm font-light mt-2">
+                  Booking will open in a new tab for the selected location.
+                </p>
+              </div>
+
+              <a id="shopBookBtn" href="#" target="_blank" rel="noopener"
+                class="inline-block bg-gold text-darker px-10 py-4 font-sans font-bold uppercase tracking-widest hover:bg-white transition-colors duration-300">
+                Book Now
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Banner / CTA -->
+      <section class="py-20 bg-gold relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 mix-blend-multiply"
+          style="background-image: url('data:image/svg+xml,%3Csvg width=%2760%27 height=%2760%27 viewBox=%270 0 60 60%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cg fill=%27none%27 fill-rule=%27evenodd%27%3E%3Cg fill=%27%23000000%27 fill-opacity=%271%27%3E%3Cpath d=%27M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z%27/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
+        </div>
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10 reveal-up">
+          <h2 class="font-display text-4xl md:text-6xl font-bold uppercase text-darker mb-6">Ready for the Top Tier Experience?</h2>
+          <p class="font-sans text-darker/80 text-lg mb-8 font-medium max-w-2xl mx-auto">Skip the wait. Lock in your spot with one of our master barbers today.</p>
+          <a id="ctaBookBtn" href="#shops"
+            class="inline-block bg-darker text-white px-10 py-4 font-sans font-bold uppercase tracking-widest hover:bg-black transition-colors shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
+            Book Your Chair
+          </a>
+        </div>
+      </section>
+
+      <!-- Footer / Contact (multi-location accurate) -->
+<footer id="contact" class="bg-dark pt-20 pb-10 border-t border-white/10">
+  <div class="max-w-7xl mx-auto px-6 md:px-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+
+      <!-- Brand -->
+      <div class="reveal-up">
+        <a href="#" class="flex items-center mb-6 shrink-0">
+          <img
+            src="imageslogo.png"
+            alt="Top Tier Logo"
+            class="h-12 w-auto object-contain"
+          >
+        </a>
+        <p class="text-gray-400 font-sans text-sm font-light leading-relaxed mb-6 max-w-xs">
+          Precision grooming with luxury energy. Multiple Oakville locations — one Top Tier standard.
+        </p>
+
+        <div class="flex space-x-4">
+          <a href="https://www.instagram.com/toptiercompany/?hl=en" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-darker transition-colors" aria-label="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://www.tiktok.com/@toptiercompany" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-darker transition-colors" aria-label="TikTok">
+            <i class="fa-brands fa-tiktok"></i>
+          </a>
+          <a href="https://www.facebook.com/TopTierFadesnKicks/" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-darker transition-colors" aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Locations (no single phone / no single hours) -->
+      <div class="reveal-up" style="transition-delay: 100ms;">
+        <h4 class="font-display text-xl text-white uppercase mb-6 tracking-wide">Locations</h4>
+
+        <ul class="space-y-4 text-sm font-sans font-light text-gray-400">
+          <li class="flex items-start">
+            <i class="fa-solid fa-location-dot text-gold mt-1 mr-3"></i>
+            <span><span class="text-white/80">KERR</span><br>143 Kerr Street, Oakville ON</span>
+          </li>
+
+          <li class="flex items-start">
+            <i class="fa-solid fa-location-dot text-gold mt-1 mr-3"></i>
+            <span><span class="text-white/80">PRESERVE</span><br>3046 Preserve Drive, Oakville ON</span>
+          </li>
+
+          <li class="flex items-start">
+            <i class="fa-solid fa-location-dot text-gold mt-1 mr-3"></i>
+            <span><span class="text-white/80">BRONTE</span><br>2354 Lakeshore Road West, Oakville ON</span>
+          </li>
+        </ul>
+
+        <a href="#shops"
+           class="mt-6 inline-flex items-center gap-2 border border-gold text-gold px-6 py-3 font-sans font-bold uppercase tracking-widest text-xs hover:bg-gold hover:text-darker transition-colors">
+          <i class="fa-solid fa-calendar-check"></i>
+          Book by Location
+        </a>
+
+        <p class="text-gray-500 font-sans text-xs font-light mt-4">
+          Hours and phone numbers vary by location — booking links are inside each shop.
+        </p>
+      </div>
+
+      <!-- Links -->
+      <div class="reveal-up" style="transition-delay: 200ms;">
+        <h4 class="font-display text-xl text-white uppercase mb-6 tracking-wide">Quick Links</h4>
+        <ul class="space-y-3 text-sm font-sans font-light text-gray-400">
+          <li><a href="#about" class="hover:text-gold transition-colors">Our Story</a></li>
+          <li><a href="#services" class="hover:text-gold transition-colors">Barber Services</a></li>
+          <li><a href="#kicks" class="hover:text-gold transition-colors">Kicks & Culture</a></li>
+          <li><a href="#shops" class="hover:text-gold transition-colors">Book a Chair</a></li>
+          <li><a href="privacy-policy.html" class="hover:text-gold transition-colors">
+  Privacy Policy
+</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="text-center pt-8 border-t border-white/5 text-xs font-sans text-gray-600 font-light">
+      <p>&copy; 2026 Top Tier. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+    </div>
+  </main>
+  <!-- ========= /YOUR WHOLE SITE ========= -->
+
+
+  <!-- GSAP Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // ====== PREVIEW-SAFE INTRO ENABLE ======
+      // Only run the intro if GSAP + ScrollTrigger are actually available.
+      const hasGSAP = typeof window.gsap !== "undefined";
+      const hasST = typeof window.ScrollTrigger !== "undefined";
+
+      const hero = document.getElementById("heroContainer");
+      const page = document.getElementById("siteInner");
+
+      if (!(hasGSAP && hasST)) {
+        // No GSAP in this environment (common in some preview editors):
+        // - ensure overlay is hidden
+        // - ensure site is visible
+        if (hero) hero.style.display = "none";
+        if (page) {
+          page.style.opacity = "1";
+          page.style.transform = "none";
+        }
+        return; // stop here (rest depends on GSAP)
+      }
+
+      // Enable intro mode (CSS hooks)
+      document.documentElement.classList.add("intro-enabled");
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
+
+      // tune this: 0.08 = faster reveal, 0.18 = later reveal
+      const revealAt = 0.12;
+      let revealed = false;
+
+      gsap.set(hero, { autoAlpha: 1, display: "flex" });
+      gsap.set(page, { autoAlpha: 0, y: 12 });
+
+      // Pause hero entrance animations until the page is revealed
+      const heroTl = gsap.timeline({ paused: true });
+
+      heroTl.from(".hero-bg", {
+        scale: 1.15,
+        duration: 2.5,
+        ease: "power2.out"
+      }, 0)
+      .from(".hero-content p:first-child", {
+        y: 20,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      }, 0.3)
+      .from(".hero-content h1", {
+        y: 40,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out"
+      }, 0.5)
+      .from(".hero-content p:not(:first-child)", {
+        y: 20,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      }, 0.8)
+      .from(".hero-content a", {
+        y: 20,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: "power2.out"
+      }, 1.0);
+
+      // Logo zoom timeline (scrubbed)
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: "#scrollTriggerSection",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1,
+          onUpdate: (self) => {
+            // reveal site early when logo is "big enough"
+            if (self.progress >= revealAt && !revealed) {
+              revealed = true;
+
+              gsap.to(page, { autoAlpha: 1, y: 0, duration: 0.25, overwrite: true });
+              gsap.to(hero, { backgroundColor: "rgba(0,0,0,0)", duration: 0.25, overwrite: true });
+
+              heroTl.play(0);
+            }
+
+            // if user scrolls back up above reveal point, hide site again
+            if (self.progress < revealAt && revealed) {
+              revealed = false;
+
+              gsap.to(page, { autoAlpha: 0, y: 12, duration: 0.2, overwrite: true });
+              gsap.to(hero, { backgroundColor: "#000", duration: 0.2, overwrite: true });
+
+              heroTl.pause(0);
+            }
+
+            // once intro is basically done, remove overlay entirely
+            if (self.progress > 0.98) {
+              gsap.set(hero, { autoAlpha: 0, display: "none" });
+            } else {
+              gsap.set(hero, { display: "flex" });
+              if (!revealed) gsap.set(hero, { autoAlpha: 1 });
+            }
+          }
+        }
+      })
+      // first punch-in (fast feeling)
+      .to("#zoomLogo", {
+        scale: 70,
+        opacity: 0.25,
+        filter: "blur(6px)",
+        ease: "none"
+      }, 0)
+      // finish / disappear
+      .to("#zoomLogo", {
+        scale: 110,
+        opacity: 0,
+        filter: "blur(20px)",
+        ease: "none"
+      }, 0.45);
+      /* ========= /INTRO ========= */
+
+
+      // Navbar background change on scroll (desktop + mobile)
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        if (!navbar) return;
+        if (window.scrollY > 50) {
+          navbar.classList.add('bg-darker/90', 'backdrop-blur-md');
+          navbar.classList.remove('nav-glass');
+        } else {
+          navbar.classList.remove('bg-darker/90', 'backdrop-blur-md');
+          navbar.classList.add('nav-glass');
+        }
+      }, { passive: true });
+
+      // Mobile drawer toggle
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+
+      function closeDrawer() {
+        if (!mobileDrawer) return;
+        mobileDrawer.classList.add('hidden');
+        mobileMenuBtn?.setAttribute('aria-expanded', 'false');
+        const icon = mobileMenuBtn?.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-bars';
+      }
+
+      function toggleDrawer() {
+        if (!mobileDrawer) return;
+        const isHidden = mobileDrawer.classList.contains('hidden');
+        mobileDrawer.classList.toggle('hidden', !isHidden);
+        mobileMenuBtn?.setAttribute('aria-expanded', String(isHidden));
+        const icon = mobileMenuBtn?.querySelector('i');
+        if (icon) icon.className = isHidden ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+      }
+
+      mobileMenuBtn?.addEventListener('click', toggleDrawer);
+
+      // Close drawer when clicking a link
+      mobileDrawer?.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', () => closeDrawer());
+      });
+
+      // Close on Escape
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDrawer();
+      });
+
+      // Generic Reveal Up
+      gsap.utils.toArray('.reveal-up').forEach(elem => {
+        gsap.from(elem, {
+          scrollTrigger: {
+            trigger: elem,
+            start: "top 85%",
+            toggleActions: "play none none reverse"
+          },
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.out"
+        });
+      });
+
+      // Reveal Left
+      gsap.utils.toArray('.reveal-left').forEach(elem => {
+        gsap.from(elem, {
+          scrollTrigger: {
+            trigger: elem,
+            start: "top 80%",
+          },
+          x: -50,
+          opacity: 0,
+          duration: 1,
+          ease: "power3.out"
+        });
+      });
+
+      // Reveal Right
+      gsap.utils.toArray('.reveal-right').forEach(elem => {
+        gsap.from(elem, {
+          scrollTrigger: {
+            trigger: elem,
+            start: "top 80%",
+          },
+          x: 50,
+          opacity: 0,
+          duration: 1,
+          ease: "power3.out"
+        });
+      });
+
+      // Stagger Cards (Services)
+      gsap.utils.toArray('.stagger-container').forEach(container => {
+        const items = container.querySelectorAll('.stagger-item');
+        gsap.from(items, {
+          scrollTrigger: {
+            trigger: container,
+            start: "top 80%",
+          },
+          y: 50,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out"
+        });
+      });
+
+      // Stagger Cards (Kicks)
+      gsap.utils.toArray('.stagger-container-kicks').forEach(container => {
+        const items = container.querySelectorAll('.stagger-kick');
+        gsap.from(items, {
+          scrollTrigger: {
+            trigger: container,
+            start: "top 80%",
+          },
+          y: 50,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out"
+        });
+      });
+
+      // Shop selector -> unlock booking link (desktop + mobile + drawer)
+      const shopButtons = document.querySelectorAll('[data-shop]');
+      const bookingPanel = document.getElementById('shopBookingPanel');
+      const selectedShopName = document.getElementById('selectedShopName');
+      const shopBookBtn = document.getElementById('shopBookBtn');
+
+      const navBookBtn = document.getElementById('navBookBtn');
+      const navBookBtnMobile = document.getElementById('navBookBtnMobile');
+      const drawerBookBtn = document.getElementById('drawerBookBtn');
+      const heroBookBtn = document.getElementById('heroBookBtn');
+      const ctaBookBtn = document.getElementById('ctaBookBtn');
+
+      function setBooking(shopName, bookingUrl) {
+        if (selectedShopName) selectedShopName.textContent = shopName;
+        if (shopBookBtn) shopBookBtn.href = bookingUrl;
+
+        bookingPanel?.classList.remove('hidden');
+
+        [navBookBtn, navBookBtnMobile, drawerBookBtn, heroBookBtn, ctaBookBtn].forEach(btn => {
+          if (!btn) return;
+          btn.href = bookingUrl;
+          btn.target = "_blank";
+          btn.rel = "noopener";
+        });
+
+        bookingPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+        closeDrawer();
+      }
+
+      shopButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const shopName = btn.getAttribute('data-shop-name') || 'Top Tier';
+          const bookingUrl = btn.getAttribute('data-booking-url') || '#';
+          setBooking(shopName, bookingUrl);
+        });
+      });
+
+    });
+  </script>
+</body>
+</html>
