@@ -698,7 +698,7 @@ if (isMobile) {
 if (!isMobile) document.documentElement.classList.add("intro-enabled");;
 
       gsap.registerPlugin(ScrollTrigger);
-// don't return; only skip the INTRO block on mobile
+if (isMobile) return;
 
       /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
 
@@ -960,6 +960,7 @@ if (!isMobile) document.documentElement.classList.add("intro-enabled");;
   </script>
 </body>
 </html>
+
 
 
 
