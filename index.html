@@ -202,7 +202,6 @@
   pointer-events: auto;
   touch-action: manipulation;
 }
-}
     /* ========= /INTRO LOGO ZOOM ========= */
   </style>
 </head>
@@ -677,16 +676,23 @@ if (isMobile) {
       const page = document.getElementById("siteInner");
 
       if (!(hasGSAP && hasST)) {
-        // No GSAP in this environment (common in some preview editors):
-        // - ensure overlay is hidden
-        // - ensure site is visible
-        if (hero) hero.style.display = "none";
-        if (page) {
-          page.style.opacity = "1";
-          page.style.transform = "none";
-        }
-        return; // stop here (rest depends on GSAP)
-      }
+  if (hero) hero.style.display = "none";
+  if (page) { page.style.opacity = "1"; page.style.transform = "none"; }
+  // DO NOT return; booking + drawer must still initialize
+} else {
+  // Enable intro mode (CSS hooks) — desktop only
+  if (!isMobile) document.documentElement.classList.add("intro-enabled");
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  if (!isMobile) {
+    /* ========= INTRO (FAST + REVEAL CONTENT EARLY) ========= */
+    // (your intro timelines exactly as-is)
+    /* ========= /INTRO ========= */
+  }
+
+  // your reveal/stagger animations can still run here if you want them tied to GSAP
+}
 
       // Enable intro mode (CSS hooks) — desktop only
 if (!isMobile) document.documentElement.classList.add("intro-enabled");;
@@ -954,6 +960,7 @@ if (!isMobile) document.documentElement.classList.add("intro-enabled");;
   </script>
 </body>
 </html>
+
 
 
 
