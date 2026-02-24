@@ -586,10 +586,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // ✅ NO BLUR (biggest hitch culprit), slightly reduced scaling
-    introTl
-      .to("#zoomLogo", { scale: 55, opacity: 0.25, ease: "none" }, 0)
-      .to("#zoomLogo", { scale: 85, opacity: 0, ease: "none" }, 0.45);
+  // first punch-in (fast feeling)
+.to("#zoomLogo", {
+  scale: 40,
+  opacity: 0.28,
+  ease: "none",
+  force3D: true
+}, 0)
+
+// finish / disappear (NO blur + lower max scale)
+.to("#zoomLogo", {
+  scale: 70,
+  opacity: 0,
+  ease: "none",
+  force3D: true
+}, 0.35);
   }
 
   // Reveal animations
@@ -625,3 +636,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
