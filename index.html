@@ -751,39 +751,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const showSite = () => gsap.to(pageEl, { autoAlpha: 1, y: 0, duration: 0.25, overwrite: true });
     const hideSite = () => gsap.to(pageEl, { autoAlpha: 0, y: 12, duration: 0.2, overwrite: true });
 
-    const introTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#scrollTriggerSection",
-        start: "top top",
-        end: "bottom top",
-        scrub: 1,
+    let heroPlayed = false;
 
-        onLeave: () => {
-          gsap.set(heroEl, { autoAlpha: 0, display: "none" });
-          showSite();
-          heroTl.play(0);
-        },
+const introTl = gsap.timeline({
+  scrollTrigger: {
+    trigger: "#scrollTriggerSection",
+    start: "top top",
+    end: "bottom top",
+    scrub: 1,
 
-        onEnterBack: () => {
-          gsap.set(heroEl, { autoAlpha: 1, display: "flex", backgroundColor: "#000" });
-          hideSite();
-          heroTl.pause(0);
-        },
+    onLeave: () => {
+      gsap.set(heroEl, { autoAlpha: 0, display: "none" });
+      showSite();
 
-        onUpdate: (self) => {
-          if (self.progress >= revealAt) {
-            showSite();
-            gsap.set(heroEl, { backgroundColor: "rgba(0,0,0,0)" });
-            if (!heroTl.isActive()) heroTl.play(0);
-          } else {
-            hideSite();
-            gsap.set(heroEl, { backgroundColor: "#000" });
-            heroTl.pause(0);
-          }
-        }
+      if (!heroPlayed) {
+        heroPlayed = true;
+        heroTl.play(0);
       }
-    });
+    },
 
+    onEnterBack: () => {
+      heroPlayed = false; // allow it to play again only when user scrolls back up then down again
+      gsap.set(heroEl, { autoAlpha: 1, display: "flex", backgroundColor: "#000" });
+      hideSite();
+      heroTl.pause(0);
+    },
+
+    onUpdate: (self) => {
+      // Only handle visibility here — DO NOT restart heroTl here
+      if (self.progress >= revealAt) {
+        showSite();
+        gsap.set(heroEl, { backgroundColor: "rgba(0,0,0,0)" });
+      } else {
+        hideSite();
+        gsap.set(heroEl, { backgroundColor: "#000" });
+      }
+    }
+  }
+});
   // first punch-in (fast feeling)
 introTl
   .to("#zoomLogo", {
@@ -833,6 +838,7 @@ introTl
 </script>
 </body>
 </html>
+
 
 
 
