@@ -696,12 +696,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-shop]");
-    if (!btn) return;
-    const shopName = btn.getAttribute("data-shop-name") || "Top Tier";
-    const bookingUrl = btn.getAttribute("data-booking-url") || "#";
-    setBooking(shopName, bookingUrl);
-  });
+  const btn = e.target.closest("[data-shop]");
+  if (!btn) return;
+
+  const shopName   = btn.getAttribute("data-shop-name") || "Top Tier";
+  const bookingUrl = btn.getAttribute("data-booking-url") || "#";
+
+  // Update your panel like before
+  setBooking(shopName, bookingUrl);
+
+  // 🔑 NEW: open booking instantly
+  if (bookingUrl && bookingUrl !== "#") {
+    window.open(bookingUrl, "_blank", "noopener");
+  }
+});
 
   // ----------------------------
   // 3) INTRO: DISABLE ON MOBILE
@@ -838,6 +846,7 @@ introTl
 </script>
 </body>
 </html>
+
 
 
 
